@@ -19,7 +19,7 @@ class GaussianNoise(BasicClass):
     def getParams(cls):
         # 获取高斯噪声的参数
         mean = np.random.uniform(-1, 1)
-        std_dev = np.random.uniform(0, 2)
+        std_dev = np.random.uniform(0, 1)
 
         params = {'mean': mean, 'std_dev': std_dev}
         return params
@@ -51,8 +51,8 @@ class SaltPepperNoise(BasicClass):
     @classmethod
     def getParams(cls):
         # 获取椒盐噪声的参数
-        salt_prob = np.random.uniform(0, 0.02)
-        pepper_prob = np.random.uniform(0, 0.02)
+        salt_prob = np.random.uniform(0, 0.01)
+        pepper_prob = np.random.uniform(0, 0.01)
         params = {'salt_prob': salt_prob, 'pepper_prob': pepper_prob}
         return params
 
@@ -66,8 +66,8 @@ class UniformNoise(BasicClass):
     @classmethod
     def apply(cls, image: np.ndarray, params: Dict):
         # 添加均匀噪声
-        low = params.get('low', 0)
-        high = params.get('high', 255)
+        low = params.get('low', 80)
+        high = params.get('high', 130)
         noise = np.random.uniform(low, high, image.shape)
         noisy_image = image + noise
         return np.clip(noisy_image, 0, 255).astype(np.uint8)
@@ -75,8 +75,8 @@ class UniformNoise(BasicClass):
     @classmethod
     def getParams(cls):
         # 获取均匀噪声的参数
-        low = np.random.uniform(0, 5)
-        high = np.random.uniform(250, 255)
+        low = np.random.uniform(0, 10)
+        high = np.random.uniform(10, 20)
         params = {'low': low, 'high': high}
         return params
 
@@ -112,48 +112,13 @@ class GaussianMixtureNoise(BasicClass):
         num_components = np.random.randint(2, 4)
         weights = np.random.dirichlet(np.ones(num_components))
         means = np.random.uniform(-1, 1, num_components)
-        std_devs = np.random.uniform(0, 2, num_components)
+        std_devs = np.random.uniform(0, 1, num_components)
 
         params = {'num_components': num_components, 'weights': weights, 'means': means, 'std_devs': std_devs}
         return params
 
     @classmethod
     def changeBoxes(cls, boxes: List[Tuple[float, float, float, float]], info: Tuple[int, int], params: Dict):
-        return boxes
-
-
-class ImpulseNoise(BasicClass):
-    """
-    脉冲噪声类，模拟图像中的盐噪声和椒噪声。
-    """
-
-    @classmethod
-    def apply(cls, image: np.ndarray, params: Dict):
-        salt_prob = params.get('salt_prob', 0.01)
-        pepper_prob = params.get('pepper_prob', 0.01)
-
-        noisy_image = np.copy(image)
-
-        # 添加盐噪声
-        salt_mask = np.random.random(image.shape) < salt_prob
-        noisy_image[salt_mask] = 255
-
-        # 添加椒噪声
-        pepper_mask = np.random.random(image.shape) < pepper_prob
-        noisy_image[pepper_mask] = 0
-
-        return noisy_image.astype(np.uint8)
-
-    @classmethod
-    def getParams(cls):
-        salt_prob = np.random.uniform(0, 0.02)
-        pepper_prob = np.random.uniform(0, 0.02)
-        params = {'salt_prob': salt_prob, 'pepper_prob': pepper_prob}
-        return params
-
-    @classmethod
-    def changeBoxes(cls, boxes: List[Tuple[float, float, float, float]], info: Tuple[int, int], params: Dict):
-        # 对于脉冲噪声，不进行位置变换，直接返回原始框
         return boxes
 
 
@@ -184,7 +149,7 @@ class PeriodicNoise(BasicClass):
     @classmethod
     def getParams(cls):
         frequency = np.random.uniform(0.05, 0.2)
-        amplitude = np.random.uniform(2, 5)
+        amplitude = np.random.uniform(5, 10)
         params = {'frequency': frequency, 'amplitude': amplitude}
         return params
 

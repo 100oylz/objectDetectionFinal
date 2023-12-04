@@ -6,7 +6,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import cv2
 import concurrent
-from package.augment.noise import GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise, ImpulseNoise, \
+from package.augment.noise import GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise, \
     UniformNoise, PeriodicNoise
 from package.augment.affine import ScalingTransformation, RotationTransformation, FlipTransformation, \
     TranslationTransformation
@@ -16,14 +16,14 @@ from package.utils.instance import Instance
 from package.augment._basicclass import BasicClass
 
 AUGMENTCLASSES: Tuple[BasicClass, ...] = (
-    GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise, ImpulseNoise,
+    GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise,
     UniformNoise, PeriodicNoise, ScalingTransformation,
     RotationTransformation, FlipTransformation,
     TranslationTransformation, BrightnessAdjustment, ContrastAdjustment, SaturationAdjustment,
     HueSaturationAdjustment)
 FORMATIDDICT: Dict[int, BasicClass] = {(1 << i): AUGMENTCLASSES[i] for i in range(len(AUGMENTCLASSES))}
 AUGMENTNOISE: Tuple[BasicClass, ...] = (
-    GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise, ImpulseNoise,
+    GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise,
     UniformNoise, PeriodicNoise
 )
 
