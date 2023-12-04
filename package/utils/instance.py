@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Tuple
 from pathlib import Path
 
-FORMAT = '{} {} {} {} {}'
+FORMAT = '{} {} {} {} {}\n'
 IDFORMAT = '{}_{}'
 
 

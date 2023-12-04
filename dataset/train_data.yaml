@@ -5,4 +5,3 @@ names:
 test: null
 train: images/train
 val: images/val
-
