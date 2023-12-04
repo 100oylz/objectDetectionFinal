@@ -46,11 +46,18 @@ class Augment():
         self.noise_length = len(AUGMENTNOISE)
         self.ensure_max_id = 1 << (self.class_length + 1)
         self.noise_min_id = 1 << (self.noise_length + 1)
+        self.noise_list = [i for i in range(self.noise_length)]
+        self.other_list = [i for i in range(self.noise_length + 1, self.class_length)]
 
     def get_random_format_id(self):
-        format_id = random.randint(self.noise_min_id, self.ensure_max_id)
-        noise_id = random.randint(0, self.noise_min_id)
-        return format_id + (1 << noise_id)
+        id_list = []
+        id_list.append(random.choice(self.noise_list))
+        k = random.randint(3, 5)
+        id_list.extend(random.sample(self.other_list, k))
+        format_id = 0
+        for id in id_list:
+            format_id += 1 << id
+        return format_id
 
     def sparse_format_id(self, format_id) -> Tuple[List[BasicClass], List[int]]:
         augment_func_list = []
@@ -69,8 +76,8 @@ class Augment():
         format_id = self.get_random_format_id()
         augment_func_list, id_list = self.sparse_format_id(format_id)
         newinstance = deepcopy(instance)
+
         for augment_func in augment_func_list:
-            print(augment_func.__class__.__name__)
             image = newinstance.data
             params = augment_func.getParams()
             newinstance.data = augment_func.apply(image, params)

@@ -1,1 +1,7 @@
 /detectImageFinal/
+# Allow the dataset directory
+
+/dataset/images/train/*
+/dataset/images/val/*
+/dataset/labels/train/*
+/dataset/labels/val/*
