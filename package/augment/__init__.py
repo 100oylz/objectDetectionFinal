@@ -6,6 +6,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 import cv2
 import concurrent
+import gc
 from package.augment.noise import GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise, \
     UniformNoise, PeriodicNoise
 from package.augment.affine import ScalingTransformation, RotationTransformation, FlipTransformation, \
@@ -18,7 +19,7 @@ from package.augment._basicclass import BasicClass
 AUGMENTCLASSES: Tuple[BasicClass, ...] = (
     GaussianNoise, GaussianMixtureNoise, SaltPepperNoise, BlurNoise,
     UniformNoise, PeriodicNoise, ScalingTransformation,
-    RotationTransformation, FlipTransformation,
+    FlipTransformation,
     TranslationTransformation, BrightnessAdjustment, ContrastAdjustment, SaturationAdjustment,
     HueSaturationAdjustment)
 FORMATIDDICT: Dict[int, BasicClass] = {(1 << i): AUGMENTCLASSES[i] for i in range(len(AUGMENTCLASSES))}
@@ -37,6 +38,7 @@ def process_instance(instance, save_image_dirs, save_label_dirs):
     with open(str(save_label_path), 'w') as f:
         f.writelines(boxes_string)
     print(f'{format_id} Saved!')
+    gc.collect()
 
 
 class Augment():
@@ -123,9 +125,9 @@ class Augment():
         save_valid_image_dirs = save_dirs / 'images' / 'val'
         save_valid_label_dirs = save_dirs / 'labels' / 'val'
 
-        changed_instance_list, changed_format_id_set_list = self.randomSample(train_instance_list, 1, 3)
+        changed_instance_list, changed_format_id_set_list = self.randomSample(train_instance_list, 1, 2)
         print(changed_format_id_set_list)
-
+        gc.collect()
         # 使用 ThreadPoolExecutor 进行并行计算
         with ThreadPoolExecutor() as executor:
             # 并行处理验证集

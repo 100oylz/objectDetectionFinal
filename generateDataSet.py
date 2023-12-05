@@ -12,7 +12,6 @@ import cv2
 
 
 def xyhw_2xyxy(box: Tuple[float, float, float, float], height: int, width: int) -> Tuple[float, float, float, float]:
-    print(box)
     x_center_ratio, y_center_ratio, h_box_ratio, w_box_ratio = box
 
     # 计算 xyxy 格式的框
@@ -59,7 +58,7 @@ def generate_yaml():
         data: str
         train: str
         val: str
-        test: str
+        test: None
         names: dict
 
     # Create an instance of the NamedTuple
@@ -102,7 +101,6 @@ def visuallizeBox():
 
 if __name__ == '__main__':
     set_seed()
-    # generate_Dataset()
-    # generate_yaml()
-
+    generate_Dataset()
+    generate_yaml()
     visuallizeBox()

@@ -61,61 +61,42 @@ class RotationTransformation(BasicClass):
     @classmethod
     def changeBoxes(cls, boxes: List[Tuple[float, float, float, float]], info: Tuple[int, int], params: Dict):
         angle = params['angle']
-        center_x, center_y = info[0] // 2, info[1] // 2
+        w, h = info
+        nw, nh = w * 1, h * 1
+        rot_mat = cv2.getRotationMatrix2D((nw * 0.5, nh * 0.5), angle, 1)
+        rot_move = np.dot(rot_mat, np.array([(nw - w) * 0.5, (nh - h) * 0.5, 0]))
+        # the move only affects the translation, so update the translation
+        rot_mat[0, 2] += rot_move[0]
+        rot_mat[1, 2] += rot_move[1]
 
-        # Convert angle to radians
-        angle_rad = np.radians(angle)
+        # 矫正bbox坐标
+        # rot_mat是最终的旋转矩阵
+        # 获取原始bbox的四个中点，然后将这四个点转换到旋转后的坐标系下
+        rot_bboxes = list()
+        for bbox in boxes:
+            xmin = bbox[0]
+            ymin = bbox[1]
+            xmax = bbox[2]
+            ymax = bbox[3]
+            point1 = np.dot(rot_mat, np.array([(xmin + xmax) / 2, ymin, 1]))
+            point2 = np.dot(rot_mat, np.array([xmax, (ymin + ymax) / 2, 1]))
+            point3 = np.dot(rot_mat, np.array([(xmin + xmax) / 2, ymax, 1]))
+            point4 = np.dot(rot_mat, np.array([xmin, (ymin + ymax) / 2, 1]))
+            # 合并np.array
+            concat = np.vstack((point1, point2, point3, point4))
+            # 改变array类型
+            concat = concat.astype(np.int32)
+            # 得到旋转后的坐标
+            rx, ry, rw, rh = cv2.boundingRect(concat)
+            rx_min = rx
+            ry_min = ry
+            rx_max = rx + rw
+            ry_max = ry + rh
 
-        # Adjust bounding box coordinates after rotation
-        rotated_boxes = []
-        rotate_matrix = np.array([[np.cos(angle_rad), -np.sin(angle_rad)], [np.sin(angle_rad), np.cos(angle_rad)]])
-        for box in boxes:
-            x_min, y_min, x_max, y_max = box
-            xmin, ymin, xmax, ymax = box
+            # 加入list中
+            rot_bboxes.append([rx_min, ry_min, rx_max, ry_max])
 
-            # Translate coordinates to center
-            x_min -= center_x
-            y_min -= center_y
-            x_max -= center_x
-            y_max -= center_y
-
-            point1 = np.array([x_min, y_min])
-            point2 = np.array([x_min, y_max])
-            point3 = np.array([x_max, y_min])
-            point4 = np.array([x_max, y_max])
-
-            point1 = np.dot(rotate_matrix, point1)
-            point2 = np.dot(rotate_matrix, point2)
-            point3 = np.dot(rotate_matrix, point3)
-            point4 = np.dot(rotate_matrix, point4)
-
-            # Rotate coordinates
-            x_min_rot = np.min([point1[0], point2[0], point3[0], point4[0]])
-            y_min_rot = np.min([point1[1], point2[1], point3[1], point4[1]])
-            x_max_rot = np.max([point1[0], point2[0], point3[0], point4[0]])
-            y_max_rot = np.max([point1[1], point2[1], point3[1], point4[1]])
-
-            # Translate coordinates back to original position
-            x_min_rot += center_x
-            y_min_rot += center_y
-            x_max_rot += center_x
-            y_max_rot += center_y
-
-            x_min_rot, y_min_rot, x_max_rot, y_max_rot = np.clip(x_min_rot, 0, info[0]), np.clip(y_min_rot, 0,
-                                                                                                 info[1]), np.clip(
-                x_max_rot, 0, info[0]), np.clip(y_max_rot, 0, info[1])
-
-            if (x_max_rot - x_min_rot) / (xmax - xmin) < EXIST_PROB:
-                continue
-            if (y_max_rot - y_min_rot) / (ymax - ymin) < EXIST_PROB:
-                continue
-            if (x_max_rot - x_min_rot) * (y_max_rot - y_min_rot) / (xmax - xmin) / (
-                    ymax - ymin) < EXIST_PROB * SCALE_PROB:
-                continue
-            # Update rotated box coordinates
-            rotated_boxes.append((x_min_rot, y_min_rot, x_max_rot, y_max_rot))
-
-        return rotated_boxes
+        return rot_bboxes
 
 
 class ScalingTransformation(BasicClass):

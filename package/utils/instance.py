@@ -7,9 +7,10 @@ FORMAT = '{} {} {} {} {}\n'
 IDFORMAT = '{}_{}'
 
 
+
 def xyxy_xyhw(box: Tuple[float, float, float, float], info: Tuple[int, int]):
     x_min, y_min, x_max, y_max = box
-    height, width = info
+    width,height = info
     x_center, y_center = (x_min + x_max) / 2 / width, (y_min + y_max) / 2 / height
     ins_height, ins_width = (y_max - y_min) / height, (x_max - x_min) / width
     return x_center, y_center, ins_height, ins_width

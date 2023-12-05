@@ -1,7 +1,0 @@
-data: D:\ProgramProject\PycharmProject\ObjectDetectionFinal\dataset
-names:
-  0: ship
-  1: plane
-test: null
-train: images/train
-val: images/val
